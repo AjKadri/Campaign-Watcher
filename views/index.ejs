@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campaign Watcher</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" id="pulse-dot"></span>
+        <span class="brand-name">Campaign Watcher</span>
+      </div>
+      <nav class="topnav">
+        <a href="/" class="active">Dashboard</a>
+        <a href="/settings">Settings</a>
+      </nav>
+    </header>
+
+    <section class="statusbar">
+      <div class="statusbar-left">
+        <span id="status-indicator" class="status-pill status-unknown">— checking status —</span>
+        <span class="target-line">watching <code id="target-url">…</code></span>
+      </div>
+      <div class="statusbar-actions">
+        <button id="btn-check" class="btn btn-ghost">Check now</button>
+        <button id="btn-start" class="btn btn-primary">Start</button>
+        <button id="btn-stop" class="btn btn-danger">Stop</button>
+      </div>
+    </section>
+
+    <section class="grid-cards">
+      <div class="card">
+        <div class="card-label">Campaigns tracked</div>
+        <div class="card-value" id="stat-count">–</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Last checked</div>
+        <div class="card-value card-value-sm" id="stat-last">–</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Next check</div>
+        <div class="card-value card-value-sm" id="stat-next">–</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Check interval</div>
+        <div class="card-value card-value-sm" id="stat-interval">–</div>
+      </div>
+    </section>
+
+    <section class="columns">
+      <div class="panel panel-campaigns">
+        <div class="panel-header">
+          <h2>Current campaigns</h2>
+          <span class="panel-sub" id="campaigns-sub"></span>
+        </div>
+        <div class="table-scroll">
+          <table class="campaign-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>URL</th>
+              </tr>
+            </thead>
+            <tbody id="campaign-rows">
+              <tr><td colspan="3" class="empty-row">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel panel-events">
+        <div class="panel-header">
+          <h2>Recent events</h2>
+        </div>
+        <ul class="event-list" id="event-list">
+          <li class="empty-row">Loading…</li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

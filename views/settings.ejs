@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — Campaign Watcher</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <span class="brand-name">Campaign Watcher</span>
+      </div>
+      <nav class="topnav">
+        <a href="/">Dashboard</a>
+        <a href="/settings" class="active">Settings</a>
+      </nav>
+    </header>
+
+    <section class="panel settings-panel">
+      <div class="panel-header">
+        <h2>Configuration</h2>
+        <span class="panel-sub">Read from your .env file at startup</span>
+      </div>
+
+      <p class="settings-note">
+        These values come from environment variables and can't be changed from this page —
+        that's intentional, so secrets (like your Telegram bot token) never touch the
+        browser. To change something, edit <code>.env</code> in the project folder and
+        restart the app.
+      </p>
+
+      <div class="settings-grid">
+        <div class="settings-row">
+          <div class="settings-key">Target URL</div>
+          <div class="settings-val"><%= targetUrl %></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-key">Check interval</div>
+          <div class="settings-val"><%= checkIntervalMs %> ms (<%= Math.round(checkIntervalMs / 1000) %>s)</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-key">Request timeout</div>
+          <div class="settings-val"><%= requestTimeoutMs %> ms</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-key">Telegram bot token</div>
+          <div class="settings-val"><%= telegramConfigured ? "✅ configured" : "❌ not set" %></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-key">Telegram chat ID</div>
+          <div class="settings-val"><%= telegramChatConfigured ? "✅ configured" : "❌ not set" %></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-key">Server port</div>
+          <div class="settings-val"><%= port %></div>
+        </div>
+      </div>
+
+      <div class="settings-howto">
+        <h3>How to change these</h3>
+        <ol>
+          <li>Open <code>.env</code> in the project root.</li>
+          <li>Edit <code>TARGET_URL</code>, <code>CHECK_INTERVAL</code>, or the Telegram variables.</li>
+          <li>Restart the app (<code>npm run dev</code> will pick up code changes automatically,
+              but .env changes need a fresh restart).</li>
+        </ol>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
