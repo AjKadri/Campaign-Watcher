@@ -25,8 +25,43 @@ export function parseCampaigns(contentType, body) {
   return parseFromHtml(body);
 }
 
+// /**
+//  * --- OPTION A: API MONITORING ---
+//  *
+//  * If the target exposes a JSON API, this is where you map its fields
+//  * onto our normalized shape. Right now this assumes a response like:
+//  *
+//  *   { "campaigns": [ { "id": "1", "name": "...", "url": "...", "status": "..." } ] }
+//  *
+//  * CUSTOMIZE HERE: adjust the field names below (e.g. item.name vs
+//  * item.title, item.slug vs item.id) to match the real API response.
+//  */
+// function parseFromJson(body) {
+//   let data;
+//   try {
+//     data = JSON.parse(body);
+//   } catch (err) {
+//     console.error("[ERROR] Invalid JSON response from target API:", err.message);
+//     return [];
+//   }
+
+//   // Handle either a bare array or an object with a "campaigns" field —
+//   // adjust this if the real API wraps data differently
+//   // (e.g. data.results, data.data, etc.)
+//   const items = Array.isArray(data) ? data : data.campaigns || [];
+
+//   return items.map((item) => ({
+//     id: String(item.id ?? item.slug ?? item.url), // fall back to url if no id
+//     title: item.name ?? item.title ?? "Untitled campaign",
+//     url: item.url ?? item.link ?? "",
+//     status: item.status ?? "unknown",
+//     timestamp: item.updatedAt ?? item.timestamp ?? null,
+//     meta: item, // keep the original object around in case you need more fields later
+//   }));
+// }
+
 /**
- * --- OPTION B: HTML SCRAPING (fallback) ---
+ * --- OPTION B: HTML SCRAPING ---
  *
  * Used when the target doesn't expose a JSON API and we have to read
  * campaign info directly out of the rendered HTML using CSS selectors.
