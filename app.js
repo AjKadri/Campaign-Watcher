@@ -11,11 +11,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- View engine ---
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// --- Static files (CSS/JS) ---
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
@@ -45,7 +43,7 @@ app.listen(PORT, () => {
   console.log("================================\n");
   console.log(`Dashboard:        http://localhost:${PORT}`);
   console.log(`Target:           ${process.env.TARGET_URL || "(not set — check your .env)"}`);
-  console.log(`Check interval:   ${(Number(process.env.CHECK_INTERVAL) || 10000) / 1000} seconds\n`);
+  console.log(`Check interval:   ${(Number(process.env.CHECK_INTERVAL) || 30000) / 1000} seconds\n`);
 
   if (!process.env.TARGET_URL) {
     console.warn("[WARN] TARGET_URL is not set in .env — the watcher won't have anything to check.");

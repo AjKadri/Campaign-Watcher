@@ -1,5 +1,3 @@
-// utils/stateManager.js
-//
 // Responsible for ONE thing: remembering what campaigns we saw last time.
 // This is what lets the app survive a restart without treating every
 // campaign as "new" again.
@@ -67,35 +65,66 @@ export async function saveState(campaigns) {
  * normalized { id, title, url, status } shape.
  */
 export function compareCampaigns(previousCampaigns, currentCampaigns) {
-  const previousById = new Map(previousCampaigns.map((c) => [c.id, c]));
-  const currentById = new Map(currentCampaigns.map((c) => [c.id, c]));
+  const previousById = new Map(
+    previousCampaigns.map((campaign) => [campaign.id, campaign])
+  );
+
+  const currentById = new Map(
+    currentCampaigns.map((campaign) => [campaign.id, campaign])
+  );
 
   const newCampaigns = [];
   const removedCampaigns = [];
-  const statusChanges = [];
+  const changes = [];
 
-  // Anything in "current" that wasn't in "previous" is new,
-  // or has a status that differs from before.
   for (const campaign of currentCampaigns) {
     const previous = previousById.get(campaign.id);
 
     if (!previous) {
       newCampaigns.push(campaign);
-    } else if (previous.status !== campaign.status) {
-      statusChanges.push({
+      continue;
+    }
+
+    const changedFields = [];
+
+    const fieldsToCompare = [
+      "type",
+      "status",
+      "filled",
+      "capacity",
+      "remaining",
+      "reward",
+      "paymentType",
+    ];
+
+    for (const field of fieldsToCompare) {
+      if (previous[field] !== campaign[field]) {
+        changedFields.push({
+          field,
+          previous: previous[field],
+          current: campaign[field],
+        });
+      }
+    }
+
+    if (changedFields.length > 0) {
+      changes.push({
         campaign,
-        previousStatus: previous.status,
-        currentStatus: campaign.status,
+        previous,
+        changedFields,
       });
     }
   }
 
-  // Anything in "previous" that's no longer in "current" was removed.
   for (const campaign of previousCampaigns) {
     if (!currentById.has(campaign.id)) {
       removedCampaigns.push(campaign);
     }
   }
 
-  return { newCampaigns, removedCampaigns, statusChanges };
+  return {
+    newCampaigns,
+    removedCampaigns,
+    changes,
+  };
 }
