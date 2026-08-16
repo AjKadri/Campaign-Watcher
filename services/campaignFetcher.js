@@ -34,6 +34,15 @@ async function getBrowserContext() {
   return context;
 }
 
+export async function resetBrowserContext() {
+  if (context) {
+    await context.close().catch(() => {});
+    context = null;
+  }
+
+  console.log("[AUTH] Playwright authentication context reset.");
+}
+
 export async function fetchTarget(url) {
   let page;
 
@@ -136,5 +145,14 @@ export async function fetchTarget(url) {
     if (page) {
       await page.close();
     }
+  }
+}
+
+export async function closeBrowser() {
+  if (browser) {
+    await browser.close();
+    browser = null;
+    context = null;
+    console.log("[INFO] Playwright browser closed.");
   }
 }

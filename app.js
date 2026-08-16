@@ -1,10 +1,10 @@
-import "dotenv/config"; // loads .env into process.env
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
 import apiRoutes from "./routes/api.js";
-import { startWatching } from "./services/watcher.js";
+import { startWatching, stopWatching } from "./services/watcher.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -36,12 +36,12 @@ app.get("/settings", (req, res) => {
 // --- JSON API ---
 app.use("/api", apiRoutes);
 
-// --- Start server ---
-app.listen(PORT, () => {
+
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log("================================");
   console.log("Campaign Watcher");
   console.log("================================\n");
-  console.log(`Dashboard:        http://localhost:${PORT}`);
+  console.log(`Dashboard running on port ${PORT}`);
   console.log(`Target:           ${process.env.TARGET_URL || "(not set — check your .env)"}`);
   console.log(`Check interval:   ${(Number(process.env.CHECK_INTERVAL) || 30000) / 1000} seconds\n`);
 
@@ -49,12 +49,26 @@ app.listen(PORT, () => {
     console.warn("[WARN] TARGET_URL is not set in .env — the watcher won't have anything to check.");
   }
   if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
-    console.warn("[WARN] Telegram isn't fully configured — notifications will be skipped until you set");
-    console.warn("       TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env.");
+    console.warn("[WARN] Telegram isn't fully configured — notifications will be skipped.");
   }
 
-  // Monitoring starts automatically on boot. Use the dashboard's
-  // Start/Stop buttons (or POST /api/stop) if you'd rather control
-  // this manually.
   startWatching();
 });
+
+async function shutdown(signal) {
+  console.log(`\n[INFO] Received ${signal}. Shutting down gracefully...`);
+
+  await stopWatching();
+
+  server.close(() => {
+    console.log("[INFO] HTTP server stopped.");
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    console.warn("[WARN] Shutdown timed out. Forcing exit.");
+    process.exit(1);
+  }, 10000).unref();
+}
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

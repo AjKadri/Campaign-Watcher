@@ -1,4 +1,4 @@
-import { fetchTarget } from "./campaignFetcher.js";
+import { fetchTarget, closeBrowser, resetBrowserContext, } from "./campaignFetcher.js";
 import { parseCampaigns } from "./campaignParser.js";
 import { loadState, saveState, compareCampaigns } from "../utils/stateManager.js";
 import { logEvent } from "../utils/eventLogger.js";
@@ -8,6 +8,8 @@ import {
   notifyCampaignUpdate,
   notifySlotOpened,
   notifyError,
+  notifySessionExpired,
+  notifyReauthenticated,
 } from "./notificationService.js";
 
 const status = {
@@ -24,6 +26,9 @@ const status = {
 
 let intervalHandle = null;
 let extraBackoffUntil = 0;
+
+let authenticationRecoveryActive = false;
+let authenticationNotificationSent = false;
 
 export function getStatus() {
   return { ...status, campaigns: status.campaigns };
@@ -49,6 +54,18 @@ export async function runCheck() {
   console.log(`[INFO] Target: ${targetUrl}`);
 
   const result = await fetchTarget(targetUrl);
+
+  if (
+  authenticationRecoveryActive &&
+  result.ok
+  ) {
+  authenticationRecoveryActive = false;
+  authenticationNotificationSent = false;
+
+  console.log("[AUTH] Authentication restored.");
+
+  await notifyReauthenticated();
+  }
 
   if (!result.ok) {
     await handleFetchFailure(result);
@@ -197,11 +214,21 @@ async function handleFetchFailure(result) {
   }
 
   if (result.reason === "LOGIN_REQUIRED") {
-    console.error("[AUTH] Your saved login session has expired.");
-    console.error("[AUTH] Run: node scripts/login.js to authenticate again.");
-  }
+  console.error("[AUTH] Your saved login session has expired.");
 
-  console.error(`[ERROR] Failed to fetch campaigns (${result.reason})`);
+  await resetBrowserContext();
+
+  if (!authenticationNotificationSent) {
+    authenticationNotificationSent = true;
+    authenticationRecoveryActive = true;
+
+    await notifySessionExpired();
+
+    console.error(
+      "[AUTH] Run: node scripts/login.js to authenticate again."
+    );
+  }
+}
 
   if (result.reason === "RATE_LIMITED") {
     console.error(`[ERROR] HTTP status: 429 — backing off for ${result.retryAfterMs}ms`);
@@ -248,7 +275,7 @@ export function startWatching() {
   return status;
 }
 
-export function stopWatching() {
+export async function stopWatching() {
   if (intervalHandle) {
     clearInterval(intervalHandle);
     intervalHandle = null;
@@ -257,7 +284,8 @@ export function stopWatching() {
   status.running = false;
   status.nextCheckAt = null;
 
-  console.log("[INFO] Watcher stopped.");
+  await closeBrowser();
 
+  console.log("[INFO] Watcher stopped.");
   return status;
 }

@@ -180,6 +180,24 @@ export async function notifyError(message) {
   return sendTelegramMessage(text);
 }
 
+export async function notifySessionExpired() {
+  const text =
+    `🔐 SESSION EXPIRED\n\n` +
+    `Authentication was lost. Re-authentication started.\n\n` +
+    `Run: node scripts/login.js`;
+
+  return sendTelegramMessage(text);
+}
+
+export async function notifyReauthenticated() {
+  const text =
+    `✅ RE-AUTHENTICATED\n\n` +
+    `Authentication restored.\n\n` +
+    `Campaign monitoring resumed.`;
+
+  return sendTelegramMessage(text);
+}
+
 /**
  * Convert internal field names into readable names.
  */
