@@ -185,13 +185,20 @@ export async function runCheck() {
 
       if (slotOpened) {
         await notifySlotOpened(campaign);
-      } else {
-        await notifyCampaignUpdate(
-          campaign,
-          previous,
-          changedFields
-        );
       }
+
+      // General campaign update notifications are intentionally disabled.
+      // This prevents notifications when people join or other campaign
+      // fields change while keeping the detection and logging functionality.
+      // Now, you only get an update notification when a slot opens.
+
+      // else {
+      //   await notifyCampaignUpdate(
+      //     campaign,
+      //     previous,
+      //     changedFields
+      //   );
+      // }
     }
     await saveState(currentCampaigns);
   }
